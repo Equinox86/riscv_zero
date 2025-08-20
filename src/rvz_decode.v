@@ -16,6 +16,8 @@ module riscv_zero_decode (
     output reg [63:0] reg1_out,
     output reg [63:0] reg2_out,
     output reg [31:0] pc_out,
+    output reg [6:0] funct7_out, 
+    output reg [2:0] funct3_out, 
 
     // Decode control registers
     output reg writeback_enable,
@@ -51,8 +53,6 @@ always @(posedge clk or posedge reset) begin
         immediate <= 32'h0;
         register_file[0] <= 32'h0;
     end else begin
-        opcode <= inst_data[6:0];
-
         // Reset control signals
         writeback_enable <= 1'b0;   // 0 - no write to rd; 1 - write back to rd.
         writeback_source <= 2'b00;  // 00 - ALU, 01 - Memory, 10 - Immediate, 11 - PC+4
@@ -63,18 +63,17 @@ always @(posedge clk or posedge reset) begin
         ALU_B_mux <= 1'b0;          // 0 - use reg2_out, 1 - use immediate value
 
         // Immediate Values
-        case (opcode)
-            // RV32I OPCODES
-            7'b0010011,7'b0011011: immediate <= $signed(inst_data[31:20]);                                           // I-Type Immediate
-            7'b0100011: immediate <= $signed({inst_data[31:25], inst_data[11:7]});                                   // S-Type Immediate
-            7'b1100011: immediate <= $signed({inst_data[7], inst_data[30:25], inst_data[11:8]});                     // B-Type Immediate
-            7'b0110111: immediate <= {inst_data[31:20], inst_data[19:12], {12{1'b0}}};                                  // U-Type Immediate
-            7'b1101111: immediate <= $signed({inst_data[19:12], inst_data[20], inst_data[30:21], 1'b0});             // J-Type Immediate
-            default: immediate <= 32'h0000_0000;
+        case (op)
+            7'b0010011,7'b0011011,7'b0000011: immediate <= $signed(inst_data[31:20]);                        // I-Type Immediate
+            7'b0100011: immediate <= $signed({inst_data[31:25], inst_data[11:7]});                            // S-Type Immediate
+            7'b1100011: immediate <= $signed({inst_data[7], inst_data[30:25], inst_data[11:8]});              // B-Type Immediate
+            7'b0110111: immediate <= {inst_data[31:20], inst_data[19:12], {12{1'b0}}};                        // U-Type Immediate
+            7'b1101111: immediate <= $signed({inst_data[19:12], inst_data[20], inst_data[30:21], 1'b0});      // J-Type Immediate
+            default: immediate <= 32'h0000_0001;
         endcase
 
         // Control Signals
-        case(opcode)
+        case(op)
             7'b0000011: begin // Load Immediate
                 memory_access <= 2'b01;
                 writeback_enable <= 1'b1;
@@ -114,8 +113,11 @@ always @(posedge clk or posedge reset) begin
                 writeback_source <= 2'b11;
                 writeback_enable <= 1'b1;
             end
-
         endcase
+        opcode <= inst_data[6:0];
+        funct3_out <= funct3 ;
+        funct7_out <= funct7;
+
         // Register Access
         reg_dest <= rd;
         reg1_out <= register_file[rs1];

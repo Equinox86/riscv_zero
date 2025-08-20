@@ -25,6 +25,8 @@ module tb_decode;
     wire [63:0] reg1_out;
     wire [63:0] reg2_out;
     wire [31:0] pc_out;
+    wire [6:0] funct7; 
+    wire [2:0] funct3;
 
     // Decode control registers
     wire writeback_enable;
@@ -54,19 +56,35 @@ module tb_decode;
         .jump(jump),
         .branch(branch),
         .ALU_A_mux(ALU_A_mux),
-        .ALU_B_mux(ALU_B_mux)
+        .ALU_B_mux(ALU_B_mux),
+        .opcode(opcode),
+        .funct3_out(funct3),
+        .funct7_out(funct7)
     );
 
+    reg [31:0] instruction_memory [0:36];
+    integer i;
     initial begin
         $dumpfile("tb_decode.vcd");
         $dumpvars(0, tb_decode);
+        clk = 0;
+        pc_in = 0;
 
         // Load test instructions into memory
+        $readmemh("../src/memory/imem.hex", instruction_memory);
 
+        // Toggle Reset
         reset = 1;
-        #10 reset = 0;
+        #4 reset = 0;
+        for (i = 0; i < 36; i = i + 1) begin
+            inst_data = instruction_memory[i];
+            pc_in = i * 4;
+            #4;
+        end
+
+        $finish(0);
     end
 
-    always #5 clk = ~clk;
+    always #2 clk = ~clk;
 
 endmodule
