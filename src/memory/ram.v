@@ -2,9 +2,9 @@ module ram (
     input clk,                  // Clock signal
     input reset,                // Reset signal
     input reg write_enable,         // Write enable signal
-    input reg [31:0] address,   // Address Bus Output
-    input reg [31:0] data_in,      // Data Bus Input 
-    output reg [31:0] data_out // Data Bus Output
+    input reg [63:0] address,   // Address Bus Output
+    input reg [63:0] data_in,      // Data Bus Input
+    output reg [63:0] data_out // Data Bus Output
 );
 
 integer i;

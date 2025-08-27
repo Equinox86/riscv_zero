@@ -7,7 +7,7 @@ module tb_decode;
     reg clk;
     reg reset;
     reg [31:0] inst_data;
-    reg [31:0] pc_in;
+    reg [63:0] pc_in;
 
     // Register file writeback control
     reg reg_wenable;
@@ -24,9 +24,7 @@ module tb_decode;
     wire [4:0]  reg_dest;
     wire [63:0] reg1_out;
     wire [63:0] reg2_out;
-    wire [31:0] pc_out;
-    wire [6:0] funct7; 
-    wire [2:0] funct3;
+    wire [63:0] pc_out;
 
     // Decode control registers
     wire writeback_enable;
@@ -36,6 +34,7 @@ module tb_decode;
     wire branch;
     wire ALU_A_mux;
     wire ALU_B_mux;
+    wire [3:0] ALU_OP;
 
     riscv_zero_decode uut (
         .clk(clk),
@@ -57,12 +56,11 @@ module tb_decode;
         .branch(branch),
         .ALU_A_mux(ALU_A_mux),
         .ALU_B_mux(ALU_B_mux),
-        .opcode(opcode),
-        .funct3_out(funct3),
-        .funct7_out(funct7)
+        .ALU_OP(ALU_OP),
+        .opcode(opcode)
     );
 
-    reg [31:0] instruction_memory [0:36];
+    reg [63:0] instruction_memory [0:36];
     integer i;
     initial begin
         $dumpfile("tb_decode.vcd");
@@ -75,7 +73,7 @@ module tb_decode;
 
         // Toggle Reset
         reset = 1;
-        #4 reset = 0;
+        #2 reset = 0;
         for (i = 0; i < 36; i = i + 1) begin
             inst_data = instruction_memory[i];
             pc_in = i * 4;

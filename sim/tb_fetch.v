@@ -5,14 +5,14 @@ module tb_fetch;
     reg  clk;
     reg  reset;
     reg branch;
-    reg  [31:0] pc_in;           // Program Counter Input
+    reg  [63:0] pc_in;           // Program Counter Input
     wire [31:0] inst_data;      // Instruction Data from memory
-    wire [31:0] d_inst_data;   // Instruction Data to Decode stage    wire [31:0] mem_pc;
+    wire [31:0] d_inst_data;   // Instruction Data to Decode stage
 
     reg  mem_write_enable; // Write enable for loading ram
-    reg  [31:0] mem_data_in;    // Data input to memory (not used in fetch)
-    reg  [31:0] mem_write_data;    // Data input to memory (not used in fetch)
-    wire [31:0] mem_pc;
+    reg  [63:0] mem_data_in;    // Data input to memory (not used in fetch)
+    reg  [63:0] mem_write_data;    // Data input to memory (not used in fetch)
+    wire [63:0] mem_pc;
 
     // Instantiate the RAM module for instruction memory
     ram inst_memory (
@@ -41,7 +41,7 @@ module tb_fetch;
 
         // Initialize signals
         clk = 0;
-        pc_in = 32'h0;
+        pc_in = 64'h0;
         branch = 0;
         reset = 1;
         #5 // 1/2 clock cycle for initialization
@@ -52,13 +52,13 @@ module tb_fetch;
 
         // Preload instruction memory with some instructions
         reset = 0; mem_write_enable = 1;
-        mem_data_in = 32'hABCD_1234;
+        mem_data_in = 64'hABCD_1234;
         #10 // Write in to 0x0
-        mem_data_in = 32'hABCD_5678;
+        mem_data_in = 64'hABCD_5678;
         #10 // Write into 0x4
-        mem_data_in = 32'h0808_0808;
+        mem_data_in = 64'h0808_0808;
         #50 // Write into 0x8
-        mem_data_in = 32'hCAB1_DAB1;
+        mem_data_in = 64'hCAB1_DAB1;
         #10 // Write into 0x1C
 
         //
@@ -68,11 +68,11 @@ module tb_fetch;
         #5 // Assert Reset - Disable Mem Write Enable
         reset = 0;
         #10 // Deassert Reset - Read instruction 0x0
-        pc_in = 32'h1C; branch = 1;
+        pc_in = 64'h1C; branch = 1;
         #10 // Assert branch; Read instruction 0x1
         branch = 0;
         #10 // Deassert Branch - Read instruction 0x1C
-        pc_in = 32'h08; branch = 1;
+        pc_in = 64'h08; branch = 1;
         #10 // Assert Branch - Read instruction 0x20
         branch = 0;
         #10 // Deassert Branch - Read Instruction at 0x08

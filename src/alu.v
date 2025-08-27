@@ -1,35 +1,43 @@
 module alu (
-    input [31:0] a,           // First operand
-    input [31:0] b,           // Second operand
-    input [2:0] operation,    // Operation selector
-    output reg [31:0] result,  // Result of the operation
-    output reg carry           // Zero flag
+    input [63:0] a,
+    input [63:0] b,
+    input [3:0] operation,
+    output [63:0] result
 );
 
-always @(*) begin
+always @* begin
     case (operation)
-        3'b000: begin // Addition
-            {carry, result} = a + b;
+        4'h0: begin
+            result = a + b;
         end
-        3'b001: begin // Subtraction
-            {carry, result} = a - b;
+        4'h1: begin
+            result = a - b;
         end
-        3'b010: begin // Bitwise AND
-            result = a & b;
-            carry = 0; // No carry for bitwise operations
+        4'h2: begin
+            result = a << b;
         end
-        3'b011: begin // Bitwise OR
-            result = a | b;
-            carry = 0; // No carry for bitwise operations
+        4'h3: begin
+            result = a < b;
         end
-        3'b100: begin // Bitwise XOR
+        4'h4: begin
             result = a ^ b;
-            carry = 0; // No carry for bitwise operations
         end
-        default: begin // Default case (no operation)
-            result = 32'h00000000;
-            carry = 0;
+        4'h5: begin
+            result = a >> b;
+        end
+        4'h6: begin
+            result = a >>> b;
+        end
+        4'h7: begin
+            result = a | b;
+        end
+        4'h8: begin
+            result = a & b;
+        end
+        4'h9: begin
+            result = a == b;
         end
     endcase
 end
+
 endmodule

@@ -4,9 +4,9 @@ module tb_ram;
     reg clk;
     reg reset;
     reg write_enable;
-    reg [31:0] address;
-    reg [31:0] data_in;
-    wire [31:0] data_out;
+    reg [63:0] address;
+    reg [63:0] data_in;
+    wire [63:0] data_out;
 
     // Instantiate the RAM module
     ram uut (
